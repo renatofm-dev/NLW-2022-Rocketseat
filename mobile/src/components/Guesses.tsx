@@ -5,16 +5,18 @@ import { api } from '../services/api';
 
 import { Loading } from './Loading';
 import { Game, GameProps } from '../components/Game';
+import { EmptyMyPoolList } from './EmptyMyPoolList';
 
 interface Props {
   poolId: string;
+  code: string;
 }
 
-export function Guesses({ poolId }: Props) {
+export function Guesses({ poolId, code }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [games, setGames] = useState<GameProps[]>([]);
-  const [firstTeamPoints, setFirstTeamPoints] = useState('');
-  const [secondTeamPoints, setSecondTeamPoints] = useState('');
+  const [firstTeamPoins, setFirstTeamPoins] = useState('');
+  const [secondTeamPoins, setSecondTeamPoins] = useState('');
 
   const toast = useToast();
 
@@ -24,7 +26,7 @@ export function Guesses({ poolId }: Props) {
 
       const response = await api.get(`/pools/${poolId}/games`);
       setGames(response.data.games);
-      console.log(response.data.games);
+      //console.log(response.data.games);
     } catch (error) {
 
       toast.show({
@@ -39,7 +41,7 @@ export function Guesses({ poolId }: Props) {
 
   async function handleGuessConfirm(gameId: string) {
     try {
-      if (!firstTeamPoints || !secondTeamPoints) {
+      if (!firstTeamPoins.trim() || !secondTeamPoins.trim()) {
         return toast.show({
           title: 'Informe o placar para palpitar',
           placement: 'top',
@@ -48,8 +50,8 @@ export function Guesses({ poolId }: Props) {
       }
 
       await api.post(`/pools/${poolId}/games/${gameId}/guesses`, {
-        firstTeamPoints: Number(firstTeamPoints),
-        secondTeamPoints: Number(secondTeamPoints),
+        firstTeamPoins: Number(firstTeamPoins),
+        secondTeamPoins: Number(secondTeamPoins),
       });
 
       toast.show({
@@ -86,12 +88,13 @@ export function Guesses({ poolId }: Props) {
       renderItem={({ item }) => (
         <Game
           data={item}
-          setFirstTeamPoints={setFirstTeamPoints}
-          setSecondTeamPoints={setSecondTeamPoints}
+          setFirstTeamPoins={setFirstTeamPoins}
+          setSecondTeamPoins={setSecondTeamPoins}
           onGuessConfirm={() => handleGuessConfirm(item.id)}
         />
       )}
       _contentContainerStyle={{ pb: 10 }}
+      ListEmptyComponent= {() => <EmptyMyPoolList code={code}/>}
     />
   );
 }

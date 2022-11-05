@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Share } from 'react-native';
 import { HStack, useToast, VStack } from "native-base";
 import { useRoute } from "@react-navigation/native";
 
@@ -10,6 +11,7 @@ import { poolCardProps } from "../components/PoolCard";
 import { PoolHeader } from "../components/PoolHeader";
 import { EmptyMyPoolList } from "../components/EmptyMyPoolList";
 import { Option } from "../components/Option";
+import { Guesses } from "../components/Guesses";
 
 
 
@@ -18,7 +20,7 @@ interface RouteParams {
 }
 
 export function Details () {
-    const [optionSelected, setOptionSelected] = useState<'Seus plapites' | 'Ranking do grupo'>('Seus plapites');
+    const [optionSelected, setOptionSelected] = useState<'guesses' | 'Ranking'>('guesses');
     const [isLoading, setIsLoading] = useState(true);
     const [ poolDetails, setPoolDetails ] = useState<poolCardProps>({} as poolCardProps);
 
@@ -47,6 +49,13 @@ export function Details () {
         }
     }
 
+    async function handleCodeShare() {
+        await Share.share({
+            message: poolDetails.code,
+        });
+
+    }
+
     useEffect(() => {
         fetchPoolsDetails();
     }, [id]);
@@ -61,7 +70,12 @@ export function Details () {
 
     return (
         <VStack flex={1} bgColor="gray.900">
-            <Header title="Título do Bolão" showBackButton showShareButton/>
+            <Header 
+            title={poolDetails.title} 
+            showBackButton 
+            showShareButton
+            onShare={handleCodeShare}
+            />
 
             {
                 poolDetails._count?.participants > 0 ?
@@ -71,9 +85,25 @@ export function Details () {
                      />
 
                      <HStack bgColor="gray.800" p={1} rounded="sm" mb={5}>
-                        <Option title="Seus palpites" isSelected={true}></Option>
-                        <Option title="Ranking do grupo" isSelected={false}></Option>
+                        <Option 
+                        title="Seus palpites" 
+                        isSelected={optionSelected === 'guesses'}
+                        onPress={() => setOptionSelected('guesses')}            
+                        />
+                        
+
+                        
+                        <Option 
+                        title="Ranking do grupo" 
+                        isSelected={optionSelected === 'Ranking'}
+                        onPress={() => setOptionSelected('Ranking')}
+                        />
+
+                        
+
                      </HStack>
+
+                     <Guesses poolId={poolDetails.id} code={poolDetails.code}></Guesses>
 
 
                 </VStack>
